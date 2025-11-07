@@ -1,0 +1,97 @@
+import sistemaMMMM.*
+
+// TESTS DE VIAJES DE PLAYA
+test "Viaje de playa de 1000 metros: 2 días, no implica esfuerzo, sirve para broncearse" {
+    const playa = new ViajesPlaya(largo = 1000)
+    assert.equals(2, playa.dias())
+    assert.notThat(playa.implicaEsfuerzo())
+    assert.that(playa.sirveBroncearse())
+}
+test "Viaje de playa de 2000 metros: 4 días, implica esfuerzo, sirve para broncearse" {
+    const playa = new ViajesPlaya(largo = 2000)
+    assert.equals(4, playa.dias())
+    assert.that(playa.implicaEsfuerzo())
+    assert.that(playa.sirveBroncearse())
+}
+
+// TESTS DE EXCURSIONES
+test "Excursión ciudad normal con 4 atracciones: 2 días, no esfuerzo, no broncea" {
+    const excursion = new ExcursionCiudad(cantidadAtracciones = 4)
+    assert.equals(2, excursion.dias())
+    assert.notThat(excursion.implicaEsfuerzo())
+    assert.notThat(excursion.sirveBroncearse())
+}
+test "Excursión ciudad tropical con 8 atracciones: 5 días, esfuerzo, broncea" {
+    const excursionTropical = new ExcursionCiudadTropical(cantidadAtracciones = 8)
+    assert.equals(5, excursionTropical.dias())
+    assert.that(excursionTropical.implicaEsfuerzo())
+    assert.that(excursionTropical.sirveBroncearse())
+}
+test "Excursión con exactamente 5 atracciones es interesante aunque tenga un solo idioma" {
+    const excursion = new ExcursionCiudad(cantidadAtracciones = 5)
+    excursion.idiomas().add("español")
+    assert.that(excursion.esInteresante())
+}
+
+// TESTS DE TREKKING
+test "Trekking de 250 km en lugar con 130 días de sol: 5 días, esfuerzo, broncea" {
+    const trekking = new SalidaTrekking(
+        kilometrosSenderos = 250,
+        diasSolPorAño = 130
+    )
+    assert.equals(5, trekking.dias())
+    assert.that(trekking.implicaEsfuerzo())
+    assert.that(trekking.sirveBroncearse())
+}
+
+// TESTS DE SOCIOS
+test "Roque con 2 playas es adorador del sol y tiene solo la playa de 2000m como esforzada" {
+    const playa1000 = new ViajesPlaya(largo = 1000)
+    const playa2000 = new ViajesPlaya(largo = 2000)
+    const roque = new SocioTranquilo(
+        edad = 25,
+        maxActividades = 2
+    )
+    roque.realizarActividad(playa1000)
+    roque.realizarActividad(playa2000)
+    assert.that(roque.esAdoradorDelSol())
+    assert.equals(1, roque.actividadesEsforzadas().size())
+    assert.that(roque.actividadesEsforzadas().contains(playa2000))
+}
+test "Roque no puede realizar una tercera actividad porque llegó al máximo" {
+    const playa1000 = new ViajesPlaya(largo = 1000)
+    const playa2000 = new ViajesPlaya(largo = 2000)
+    const gimnasia = new ClaseGimnasia()
+    const roque = new SocioTranquilo(
+        edad = 25,
+        maxActividades = 2
+    )
+    roque.realizarActividad(playa1000)
+    roque.realizarActividad(playa2000)
+    assert.throwsException({ roque.realizarActividad(gimnasia) })
+}
+test "Ana con 2 playas y gimnasia ya no es adoradora del sol y tiene 2 actividades esforzadas" {
+    const playa1000 = new ViajesPlaya(largo = 1000)
+    const playa2000 = new ViajesPlaya(largo = 2000)
+    const gimnasia = new ClaseGimnasia()
+    const ana = new SocioCoherente(
+        edad = 28,
+        maxActividades = 3
+    )
+    ana.realizarActividad(playa1000)
+    ana.realizarActividad(playa2000)
+    ana.realizarActividad(gimnasia)
+    assert.notThat(ana.esAdoradorDelSol())
+    assert.equals(2, ana.actividadesEsforzadas().size())
+    assert.that(ana.actividadesEsforzadas().contains(playa2000))
+    assert.that(ana.actividadesEsforzadas().contains(gimnasia))
+}
+
+// TESTS DE ACTIVIDADES RECOMENDADAS
+test "Clase de gimnasia es recomendada para socio de 25 años pero no para uno de 35" {
+    const gimnasia = new ClaseGimnasia()
+    const socioJoven = new SocioTranquilo(edad = 25, maxActividades = 5)
+    const socioMayor = new SocioTranquilo(edad = 35, maxActividades = 5)
+    assert.that(gimnasia.esRecomendadaPara(socioJoven))
+    assert.notThat(gimnasia.esRecomendadaPara(socioMayor))
+}
